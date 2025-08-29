@@ -6,9 +6,9 @@ class LinkedList
     @tail = tail
   end
 
-  def append(value)
+  def append(key, value)
     
-    new_node = Node.new(value)
+    new_node = Node.new(key, value)
 
     if self.size == 0
       @head = new_node
@@ -81,7 +81,7 @@ class LinkedList
     end
   end
 
-  def contains?(value)
+  def contains_value?(value)
     current_node = @head
     while current_node != nil
       return true if current_node.value == value
@@ -90,7 +90,16 @@ class LinkedList
     false
   end
 
-  def find(value)
+  def contains_key?(key)
+    current_node = @head
+    while current_node != nil
+      return true if current_node.key == key
+      current_node = current_node.next_node
+    end
+    false
+  end
+
+  def find_value(value)
     current_node = @head
     current_index = 0
     while current_node != nil && value != current_node.value
@@ -101,7 +110,29 @@ class LinkedList
     nil
   end
 
-  def insert_at(value, index)
+  def find_key(key)
+    current_node = @head
+    current_index = 0
+    while current_node != nil && key != current_node.key
+      current_index += 1
+      current_node = current_node.next_node
+    end
+    return current_index if current_node.key == key
+    nil
+  end
+
+  def change_value(key, value)
+    current_node = @head
+    while current_node != nil
+      if current_node.key == key
+        current_node.value = value
+        return
+      end
+      current_node.next_node
+    end
+  end
+
+  def insert_at(index, value)
     return if index < 0
     if index == 0
       @head = Node.new(value, @head)
@@ -150,6 +181,20 @@ class LinkedList
       @tail == current_node
     end
 
+  end
+
+  def all_nodes
+    current_node = @head
+    nodes_array = []
+    while current_node != nil
+      nodes_array << current_node
+      current_node = current_node.next_node
+    end
+    nodes_array
+  end
+
+  def empty?
+    size <= 0
   end
 
   def to_s
