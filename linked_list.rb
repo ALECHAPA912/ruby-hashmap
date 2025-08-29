@@ -1,34 +1,39 @@
 require "./node.rb"
 
 class LinkedList
-  def initialize
-    @first_node = nil
-    @last_node = nil
+  def initialize(head = nil, tail = nil)
+    @head = head
+    @tail = tail
   end
 
-  def append(key, value)
-    new_node = Node.new(key, value)
-    if @first_node == nil
-      @first_node = new_node
+  def append(value)
+    
+    new_node = Node.new(value)
+
+    if self.size == 0
+      @head = new_node
+      @tail = new_node
+      return
     else
-      @last_node.next_node = new_node
+      @tail.next_node = new_node
+      @tail = @tail.next_node
     end
-    @last_node = new_node
+    
   end
 
-  def prepend(key, value)
-    new_node = Node.new(key, value)
-    if @first_node == nil
-      @first_node = new_node
-      @last_node = new_node
+  def prepend(value)
+    new_node = Node.new(value)
+    if self.size == 0
+      @tail = new_node
     else
-      @first_node = Node.new(key, value, @first_node)
+      new_node = Node.new(value, @head)
     end
+    @head = new_node
   end
 
   def size
+    current_node = @head
     counter = 0
-    current_node = @first_node
     while current_node != nil
       counter += 1
       current_node = current_node.next_node
@@ -37,173 +42,124 @@ class LinkedList
   end
 
   def head
-    @first_node.value
+    @head
   end
 
   def tail
-    @last_node.value
+    @tail
   end
 
   def at(index)
-    counter = 0
-    current_node = @first_node
-    while index > counter
+    current_node = @head
+    current_index = 0
+    while current_node != nil && index != current_index
+      current_index += 1
       current_node = current_node.next_node
-      counter += 1
     end
-    current_node.value
+    current_node
   end
 
   def pop
-    current_node = @first_node
-    while current_node.next_node != nil
-      previous_node = current_node
-      current_node = current_node.next_node
-    end
-    previous_node.next_node = nil
-    @last_node = previous_node
-  end
-
-  def contains_value?(value)
-    current_node = @first_node
-    while current_node != nil
-      return true if value == current_node.value
-      current_node = current_node.next_node
-    end
-    false
-  end
-
-  def contains_key?(key)
-    current_node = @first_node
-    while current_node != nil
-      return true if key == current_node.key
-      current_node = current_node.next_node
-    end
-    false
-  end
-
-  def replace_value(key, new_value)
-    current_node = @first_node
-    while current_node != nil
-      if key == current_node.key
-        current_node.value = new_value
-        return
+    return if self.size == 0
+    if self.size == 1
+      @head = nil
+      @tail = nil
+    elsif self.size == 2
+      @head.next_node = nil
+      @tail = @head
+    else
+      current_node = @head
+      last_node = @head
+      while current_node != nil
+        if current_node.next_node == nil
+          last_node.next_node = nil
+          return
+        end
+        last_node = current_node
+        current_node = current_node.next_node
       end
+    end
+  end
+
+  def contains?(value)
+    current_node = @head
+    while current_node != nil
+      return true if current_node.value == value
       current_node = current_node.next_node
     end
+    false
   end
 
   def find(value)
-    current_node = @first_node
-    counter = 0
-    while current_node != nil
-      return counter if value == current_node.value
+    current_node = @head
+    current_index = 0
+    while current_node != nil && value != current_node.value
+      current_index += 1
       current_node = current_node.next_node
-      counter += 1
     end
+    return current_index if current_node.value == value
     nil
   end
 
-  def find_key(key)
-    current_node = @first_node
-    while current_node != nil
-      return current_node.value if key == current_node.key
-      current_node = current_node.next_node
+  def insert_at(value, index)
+    return if index < 0
+    if index == 0
+      @head = Node.new(value, @head)
+      return
     end
-    nil
+    if index > self.size
+      new_node = Node.new(value)
+      @tail.next_node = new_node
+      @tail = new_node
+      return
+    end
+  
+    current_node = @head
+    last_node = @head
+    current_index = 0
+
+    while current_node != nil && current_index != index
+      last_node = current_node
+      current_node = current_node.next_node
+      current_index += 1
+    end
+    
+    new_node = Node.new(value, current_node)
+    last_node.next_node = new_node
+  end
+
+  def remove_at(index)
+    current_node = @head
+    last_node = @head
+    current_index = 0
+
+    if index == 0
+      @head = @head.next_node
+      return
+    end
+
+    while current_node != nil && current_index != index
+      last_node = current_node
+      current_node = current_node.next_node
+      current_index += 1
+    end
+
+    last_node.next_node = current_node.next_node
+
+    if index == self.size-1
+      @tail == current_node
+    end
+
   end
 
   def to_s
     string = ""
-    current_node = @first_node
+    current_node = @head
     while current_node != nil
-      string += current_node.to_s
+      string += "( #{current_node.value} ) -> "
       current_node = current_node.next_node
     end
-    string
-  end
-
-  def insert_at(value, index)
-    current_node = @first_node
-    previous_node = nil
-    counter = 0
-    while index > counter
-      previous_node = current_node
-      current_node = current_node.next_node
-      counter += 1
-    end
-    new_node = Node.new(value, current_node)
-    if previous_node == nil
-      @first_node = new_node
-    else
-      previous_node.next_node = new_node
-    end
-  end
-
-  def remove_at(index)
-    current_node = @first_node
-    previous_node = nil
-    counter = 0
-    while index > counter
-      previous_node = current_node
-      current_node = current_node.next_node
-      counter += 1
-    end
-    if previous_node == nil
-      @first_node = current_node.next_node
-    else
-      previous_node.next_node = current_node.next_node
-    end
-  end
-
-  def remove_key(key)
-    return nil if !contains_key?(key) 
-    current_node = @first_node
-    previous_node = nil
-    while key != current_node.key
-      previous_node = current_node
-      current_node = current_node.next_node
-      counter += 1
-    end
-    if previous_node == nil
-      @first_node = current_node.next_node
-    else
-      previous_node.next_node = current_node.next_node
-    end
-    current_node.value
-  end
-
-  def get_keys
-    current_node = @first_node
-    keys = []
-    while current_node != nil
-      keys << current_node.key
-      current_node = current_node.next_node
-    end
-    keys
-  end
-
-  def get_values
-    current_node = @first_node
-    values = []
-    while current_node != nil
-      values << current_node.value
-      current_node = current_node.next_node
-    end
-    values
-  end
-
-  def get_pairs
-    current_node = @first_node
-    pairs = []
-    while current_node != nil
-      pairs << current_node.to_s
-      current_node = current_node.next_node
-    end
-    pairs
-  end
-
-  def to_s
-    "PRIMER NODO: #{@first_node}, ULTIMO NODO: #{@last_node}"
+    string += "nil"
   end
 end
+
