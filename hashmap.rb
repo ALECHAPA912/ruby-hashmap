@@ -15,7 +15,7 @@ class HashMap
     @buckets.each do |bucket|
       next if bucket.empty?
       bucket.all_nodes.each do |node|
-        set(node.key, node.value, new_buckets)
+        new_buckets[get_index(node.key)].append(node.key, node.value)
       end
     end
 
@@ -49,5 +49,39 @@ class HashMap
     end
     
     @count += 1
+  end
+
+  # #get(key) Toma un argumento como clave y devuelve el valor asignado a esta clave. 
+  # Si no se encuentra la clave, devuelve nil.
+  
+  def get(key)
+    @buckets.each do |bucket|
+      next if bucket.empty?
+      value = bucket.find_key_throw_value(key)
+      return value if !value.nil?
+    end
+    nil
+  end
+
+  # #has?(key)toma una clave como argumento y devuelve true 
+  # o false en función de si la clave está o no en el mapa hash.
+  
+  def has?(key)
+    @buckets.each do |bucket|
+      found = bucket.contains_key?(key)
+      return true if found
+    end
+    false
+  end
+ 
+  # #remove(key)Toma una clave como argumento. Si la clave dada está en el mapa hash, debe eliminar 
+  # la entrada con esa clave y devolver el valor de la entrada eliminada. Si la clave no está en el mapa hash, 
+  # debe devolver nil.
+  
+  def remove(key)
+    if self.has?(key)
+      
+    else return nil
+    end
   end
 end

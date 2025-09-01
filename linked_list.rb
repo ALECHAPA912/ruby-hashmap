@@ -121,6 +121,15 @@ class LinkedList
     nil
   end
 
+  def find_key_throw_value(key)
+    current_node = @head
+    while current_node != nil
+      return current_node.value if current_node.key == key
+      current_node = current_node.next_node
+    end
+    nil
+  end
+
   def change_value(key, value)
     current_node = @head
     while current_node != nil
@@ -195,6 +204,14 @@ class LinkedList
 
   def empty?
     size <= 0
+  end
+
+  def remove_key(key)
+    current_node = @head
+    while current_node != nil
+
+      current_node = current_node.next_node
+    end
   end
 
   def to_s
