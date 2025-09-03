@@ -1,7 +1,7 @@
 require "./linked_list.rb"
 
 class HashMap
-  def initialize()
+  def initialize
     @capacity = 16
     @load_factor = 0.75
     @buckets = Array.new(@capacity) {LinkedList.new}
@@ -41,8 +41,9 @@ class HashMap
       @buckets[index].change_value(key, value)
     else
       @buckets[index].append(key, value)
-    end
-    if self.length >= (@capacity * @load_factor)
+      @size += 1
+    end 
+    if @size >= (@capacity * @load_factor)
       grow_buckets
     end
   end
@@ -52,7 +53,7 @@ class HashMap
   
   def get(key)
     index = get_index(key)
-    @buckets[index].find_key_throw_value(key)
+    @buckets[index].find_key_get_value(key)
   end
 
   # #has?(key)toma una clave como argumento y devuelve true 
@@ -69,18 +70,14 @@ class HashMap
   
   def remove(key)
     index = get_index(key)
-    @buckets[index].remove_key(key)
+    removed = @buckets[index].remove_key(key)
+    @size -= 1 if removed
   end
 
   #length devuelve el número de claves almacenadas en el mapa hash.
   
   def length
-    count = 0
-    @buckets.each do |bucket|
-      next if bucket.empty?
-      count += bucket.size
-    end
-    count
+    @size
   end
 
   #clear elimina todas las entradas en el mapa hash.
