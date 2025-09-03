@@ -21,6 +21,8 @@ puts test.capacity
 
 
 test.set('hat', 'pitito')
+test.set('lion', 'pitito')
+test.set('kite', 'pitito')
 p test.entries
 puts test.length
 puts test.capacity

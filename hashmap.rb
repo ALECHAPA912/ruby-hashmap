@@ -5,6 +5,7 @@ class HashMap
     @capacity = 16
     @load_factor = 0.75
     @buckets = Array.new(@capacity) {LinkedList.new}
+    @size = 0 
   end
 
   def capacity
@@ -31,7 +32,7 @@ class HashMap
    hash_code = 0
    prime_number = 31
    key.each_char { |char| hash_code = prime_number * hash_code + char.ord }
-   hash_code
+   hash_code.abs
   end
 
   def set(key, value)
@@ -41,30 +42,25 @@ class HashMap
     else
       @buckets[index].append(key, value)
     end
-    grow_buckets if @capacity * @load_factor < self.length
+    if self.length >= (@capacity * @load_factor)
+      grow_buckets
+    end
   end
 
   # #get(key) Toma un argumento como clave y devuelve el valor asignado a esta clave. 
   # Si no se encuentra la clave, devuelve nil.
   
   def get(key)
-    @buckets.each do |bucket|
-      next if bucket.empty?
-      value = bucket.find_key_throw_value(key)
-      return value if !value.nil?
-    end
-    nil
+    index = get_index(key)
+    @buckets[index].find_key_throw_value(key)
   end
 
   # #has?(key)toma una clave como argumento y devuelve true 
   # o false en función de si la clave está o no en el mapa hash.
   
   def has?(key)
-    @buckets.each do |bucket|
-      found = bucket.contains_key?(key)
-      return true if found
-    end
-    false
+    index = get_index(key)
+    @buckets[index].contains_key?(key)
   end
  
   # #remove(key) Toma una clave como argumento. Si la clave dada está en el mapa hash, debe eliminar 
@@ -72,13 +68,8 @@ class HashMap
   # debe devolver nil.
   
   def remove(key)
-    if self.has?(key)
-      @buckets.each do |bucket|
-        removed = bucket.remove_key(key)
-        return removed if !removed.nil?
-      end
-    end
-    nil
+    index = get_index(key)
+    @buckets[index].remove_key(key)
   end
 
   #length devuelve el número de claves almacenadas en el mapa hash.
@@ -87,7 +78,7 @@ class HashMap
     count = 0
     @buckets.each do |bucket|
       next if bucket.empty?
-      count += bucket.all_nodes.count
+      count += bucket.size
     end
     count
   end
@@ -95,7 +86,9 @@ class HashMap
   #clear elimina todas las entradas en el mapa hash.
 
   def clear
+    @capacity = 16
     @buckets = Array.new(@capacity) {LinkedList.new}
+    @size = 0
   end
 
   #keys devuelve una matriz que contiene todas las claves dentro del mapa hash.
@@ -127,5 +120,4 @@ class HashMap
     end
     entries_array
   end
-
 end

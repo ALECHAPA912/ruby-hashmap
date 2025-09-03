@@ -1,9 +1,10 @@
 require "./node.rb"
 
 class LinkedList
-  def initialize(head = nil, tail = nil)
-    @head = head
-    @tail = tail
+  def initialize
+    @head = nil
+    @tail = nil
+    @size = 0
   end
 
   #append(value) agrega un nuevo nodo que contiene valuehasta el final de la lista
@@ -17,30 +18,22 @@ class LinkedList
       @tail.next_node = new_node
       @tail = @tail.next_node
     end
+    @size += 1
   end
 
   #prepend(value) agrega un nuevo nodo que contiene valueal inicio de la lista
   
-  def prepend(value)
-    new_node = Node.new(value)
-    if self.size == 0
-      @tail = new_node
-    else
-      new_node = Node.new(value, @head)
-    end
+  def prepend(key, value)
+    new_node = Node.new(key, value, @head)
     @head = new_node
+    @tail = new_node if @size == 0
+    @size += 1
   end
   
   #size devuelve el número total de nodos en la lista
   
   def size
-    current_node = @head
-    counter = 0
-    while current_node != nil
-      counter += 1
-      current_node = current_node.next_node
-    end
-    counter
+    @size
   end
 
   #head devuelve el primer nodo de la lista
@@ -69,24 +62,23 @@ class LinkedList
   #pop elimina el último elemento de la lista
   
   def pop
-    return nil if self.size == 0
-    if self.size == 1
+    return nil if @size == 0
+    if @size == 1
       @head = @tail = nil
-    elsif self.size == 2
+    elsif @size == 2
       @head.next_node = nil
       @tail = @head
     else
       current_node = @head
       last_node = @head
-      while current_node != nil
-        if current_node.next_node == nil
-          last_node.next_node = nil
-          return
-        end
+      while current_node.next_node != nil
         last_node = current_node
         current_node = current_node.next_node
       end
+      last_node.next_node = nil
+      @tail = last_node
     end
+    @size -= 1
   end
 
   #contains?(value) devuelve verdadero si el valor pasado está en la lista y de lo contrario devuelve falso.
@@ -118,7 +110,7 @@ class LinkedList
       current_index += 1
       current_node = current_node.next_node
     end
-    return current_index if current_node.value == value
+    return current_index if current_node && current_node.value == value
     nil
   end
 
@@ -129,7 +121,7 @@ class LinkedList
       current_index += 1
       current_node = current_node.next_node
     end
-    return current_index if current_node.key == key
+    return current_index if current_node && current_node.key == key
     nil
   end
 
@@ -149,7 +141,7 @@ class LinkedList
         current_node.value = value
         return
       end
-      current_node.next_node
+      current_node = current_node.next_node
     end
   end
 
@@ -158,10 +150,10 @@ class LinkedList
   def insert_at(index, key, value)
     return if index < 0
     if index == 0
-      preppend(key, value)
+      prepend(key, value)
       return
     end
-    if index > (self.size - 1)
+    if index > (@size - 1)
       append(key, value)
       return
     end
@@ -173,14 +165,15 @@ class LinkedList
       current_node = current_node.next_node
       current_index += 1
     end
-    new_node = Node.new(value, current_node)
+    new_node = Node.new(key, value, current_node)
     last_node.next_node = new_node
+    @size += 1
   end
 
   #remove_at(index) que elimina el nodo en el dado index.
   
   def remove_at(index)
-    return if index < 0 || index > (self.size - 1)
+    return if index < 0 || index > (@size - 1)
     if index == 0
       @head = @head.next_node
       return
@@ -194,7 +187,10 @@ class LinkedList
       current_index += 1
     end
     last_node.next_node = current_node.next_node
-    @tail = last_node.next_node if index == (self.size - 1) 
+    if index == (self.size - 1)
+      @tail = last_node
+    end
+    @size -= 1
   end
 
   def all_nodes
@@ -231,14 +227,14 @@ class LinkedList
     current_node = @head
     entries_array = []
     while current_node != nil
-      entries_array << current_node.to_s
+      entries_array << [current_node.key, current_node.value]
       current_node = current_node.next_node
     end
     entries_array
   end
 
   def empty?
-    size == 0
+    @size == 0
   end
 
   def remove_key(key)
@@ -254,6 +250,7 @@ class LinkedList
         else
           last_node.next_node = current_node.next_node
         end
+        @size -= 1
         return current_node.value
       end
       last_node = current_node
@@ -274,5 +271,4 @@ class LinkedList
     end
     string += "nil"
   end
-end
-
+end 
