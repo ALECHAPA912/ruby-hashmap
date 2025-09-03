@@ -7,13 +7,12 @@ class LinkedList
     @size = 0
   end
 
-  #append(value) agrega un nuevo nodo que contiene valuehasta el final de la lista
+  #append(value) agrega un nuevo nodo que contiene value hasta el final de la lista
   
   def append(key, value)
     new_node = Node.new(key, value)
-    if self.size == 0
-      @head = new_node
-      @tail = new_node
+    if @size == 0
+      @head = @tail = new_node
     else
       @tail.next_node = new_node
       @tail = @tail.next_node
@@ -21,12 +20,16 @@ class LinkedList
     @size += 1
   end
 
-  #prepend(value) agrega un nuevo nodo que contiene valueal inicio de la lista
+  #prepend(value) agrega un nuevo nodo que contiene value al inicio de la lista
   
   def prepend(key, value)
-    new_node = Node.new(key, value, @head)
-    @head = new_node
-    @tail = new_node if @size == 0
+    new_node = Node.new(key, value)
+    if @size == 0
+      @head = @tail = new_node 
+    else
+      new_node.next_node = @head
+      @head = new_node
+    end
     @size += 1
   end
   
@@ -50,6 +53,7 @@ class LinkedList
   #at(index) devuelve el nodo en el punto dado index
   
   def at(index)
+    raise IndexError if index.negative? || index >= @size
     current_node = @head
     current_index = 0
     while current_node != nil && index != current_index
@@ -63,11 +67,9 @@ class LinkedList
   
   def pop
     return nil if @size == 0
+    removed = @tail
     if @size == 1
       @head = @tail = nil
-    elsif @size == 2
-      @head.next_node = nil
-      @tail = @head
     else
       current_node = @head
       last_node = @head
@@ -79,6 +81,7 @@ class LinkedList
       @tail = last_node
     end
     @size -= 1
+    removed
   end
 
   #contains?(value) devuelve verdadero si el valor pasado está en la lista y de lo contrario devuelve falso.
@@ -106,26 +109,26 @@ class LinkedList
   def find_value(value)
     current_node = @head
     current_index = 0
-    while current_node != nil && value != current_node.value
+    while current_node != nil && current_node.value != value
       current_index += 1
       current_node = current_node.next_node
     end
-    return current_index if current_node && current_node.value == value
+    return current_index if !current_node.nil?
     nil
   end
 
   def find_key(key)
     current_node = @head
     current_index = 0
-    while current_node != nil && key != current_node.key
+    while current_node != nil && current_node.key != key
       current_index += 1
       current_node = current_node.next_node
     end
-    return current_index if current_node && current_node.key == key
+    return current_index if !current_node.nil?
     nil
   end
 
-  def find_key_throw_value(key)
+  def find_key_get_value(key)
     current_node = @head
     while current_node != nil
       return current_node.value if current_node.key == key
@@ -139,58 +142,61 @@ class LinkedList
     while current_node != nil
       if current_node.key == key
         current_node.value = value
-        return
+        return true
       end
       current_node = current_node.next_node
     end
+    false
   end
 
-  #insert_at(value, index) que inserta un nuevo nodo con el proporcionado valueen el dado index.
+  #insert_at(value, index) que inserta un nuevo nodo con el proporcionado value en el dado index.
   
   def insert_at(index, key, value)
-    return if index < 0
+    raise IndexError if index.negative? || index > @size
     if index == 0
       prepend(key, value)
       return
-    end
-    if index > (@size - 1)
-      append(key, value)
+    elsif index == @size
+      append(key,value)
       return
+    else
+      current_node = @head
+      last_node = @head
+      current_index = 0
+      while current_index != index
+        last_node = current_node
+        current_node = current_node.next_node
+        current_index += 1
+      end
+      new_node = Node.new(key, value, current_node)
+      last_node.next_node = new_node
+      @size += 1
     end
-    current_node = @head
-    last_node = @head
-    current_index = 0
-    while current_node != nil && current_index != index
-      last_node = current_node
-      current_node = current_node.next_node
-      current_index += 1
-    end
-    new_node = Node.new(key, value, current_node)
-    last_node.next_node = new_node
-    @size += 1
   end
 
   #remove_at(index) que elimina el nodo en el dado index.
   
   def remove_at(index)
-    return if index < 0 || index > (@size - 1)
-    if index == 0
+    raise IndexError if index.negative? || index >= @size
+    if index == @size - 1
+      return pop
+    elsif index == 0
+      current_node = @head
       @head = @head.next_node
-      return
-    end
-    current_node = @head
-    last_node = @head
-    current_index = 0
-    while current_node != nil && current_index != index
-      last_node = current_node
-      current_node = current_node.next_node
-      current_index += 1
-    end
-    last_node.next_node = current_node.next_node
-    if index == (self.size - 1)
-      @tail = last_node
+      @tail = nil if @size == 1
+    else
+      current_node = @head
+      last_node = @head
+      current_index = 0
+      while current_index != index
+        last_node = current_node
+        current_node = current_node.next_node
+        current_index += 1
+      end
+      last_node.next_node = current_node.next_node
     end
     @size -= 1
+    current_node
   end
 
   def all_nodes
@@ -238,25 +244,29 @@ class LinkedList
   end
 
   def remove_key(key)
+    current_index = 0
     current_node = @head
     last_node = @head
     while current_node != nil
       if current_node.key == key
-        if @head == current_node
+        if current_index == 0
+          return pop if @size == 1
           @head = current_node.next_node
-        elsif @tail == current_node
+          @tail = @head if @size == 2
+        elsif current_index == @size - 1
           @tail = last_node
           @tail.next_node = nil
         else
           last_node.next_node = current_node.next_node
         end
         @size -= 1
-        return current_node.value
+        return current_node
       end
+      current_index += 1
       last_node = current_node
       current_node = current_node.next_node
     end
-    nil
+    current_node
   end
 
   #to_s Representa tus objetos LinkedList como cadenas, para que puedas imprimirlos y previsualizarlos en la consola. 
